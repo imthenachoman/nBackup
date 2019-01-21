@@ -63,6 +63,9 @@ NOW=$(/bin/date +"$ARCHIVE_DATE_FORMAT")
 ARCHIVE_DATE=$(/bin/date +"$ARCHIVE_DATE_FORMAT")
 LOG_OUTPUT_FORMAT="%s | %-15s | %-15s | %s\n"
 
+LOG_DESTINATION="$LOG_DESTINATION/$NOW"
+mkdir -p "$LOG_DESTINATION"
+
 function doIt
 {
     printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "nBackup" "starting" "done"
@@ -70,12 +73,12 @@ function doIt
     printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "rsync" "starting" "this could take a while depending on the number of files"
     
     # rsync the files and 
-    rsync -a --delete --stats --out-format="%t | %5o | %15l | %f" "${BACKUP_PATHS[@]}" "${BACKUP_DESTINATION_CURRENT}" &> "$LOG_DESTINATION/${NOW}_rsync.log"
+    rsync -a --delete --stats --out-format="%t | %5o | %15l | %f" "${BACKUP_PATHS[@]}" "${BACKUP_DESTINATION_CURRENT}" &> "$LOG_DESTINATION/rsync.log"
     
     printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "rsync" "finished" "done"
     
     # get rsync stats
-    rsync_stats=$(tail -50 "$LOG_DESTINATION/${NOW}_rsync.log" | egrep -A 50 "^Number of files: ")
+    rsync_stats=$(tail -50 "$LOG_DESTINATION/rsync.log" | egrep -A 50 "^Number of files: ")
     
     # print stats
     echo "$rsync_stats" | while read line ; do
@@ -96,7 +99,7 @@ function doIt
     if [[ "$num_files_created" -ne 0 || "$num_files_deleted" -ne 0 || "$num_files_transferred" -ne 0 ]] ; then
         # make a date folder backup using hard links
         printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "folder archive" "starting" "$BACKUP_DESTINATION_FOLDERS/$ARCHIVE_DATE"
-        cp -avl "${BACKUP_DESTINATION_CURRENT}" "$BACKUP_DESTINATION_FOLDERS/$ARCHIVE_DATE" &> "$LOG_DESTINATION/${NOW}_folder.log"
+        cp -avl "${BACKUP_DESTINATION_CURRENT}" "$BACKUP_DESTINATION_FOLDERS/$ARCHIVE_DATE" &> "$LOG_DESTINATION/folder.log"
         
         printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "folder archive" "finished" "done"
         printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "folder archiev" "stats" "linked $(find "$BACKUP_DESTINATION_FOLDERS/$ARCHIVE_DATE" -type f | wc -l) files"
@@ -120,12 +123,12 @@ function doIt
             # need to mirror the folder structure
             destinationFolder="$BACKUP_DESTINATION_COMBINED/$fileFolder"
             if [[ ! -d "$destinationFolder" ]] ; then
-                echo "'${BACKUP_DESTINATION_CURRENT}/$fileFolder' -> '$destinationFolder'" >> "$LOG_DESTINATION/${NOW}_combined.log"
+                echo "'${BACKUP_DESTINATION_CURRENT}/$fileFolder' -> '$destinationFolder'" >> "$LOG_DESTINATION/combined.log"
                 mkdir -p "$destinationFolder"
             fi
 
             # make a hard link to it
-            cp -alv "${BACKUP_DESTINATION_CURRENT}/$filePath" "$destinationFolder/$fileName.$ARCHIVE_DATE" &>> "$LOG_DESTINATION/${NOW}_combined.log"
+            cp -alv "${BACKUP_DESTINATION_CURRENT}/$filePath" "$destinationFolder/$fileName.$ARCHIVE_DATE" &>> "$LOG_DESTINATION/combined.log"
         done
         
         printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "combined backup" "finished" "done"
@@ -136,15 +139,15 @@ function doIt
     printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "nBackup" "finished" "done"
     
     # print log location
-    printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "log path" "nBackup" "$LOG_DESTINATION/${NOW}_nBackup.log"
-    printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "log path" "rsync" "$LOG_DESTINATION/${NOW}_rsync.log"
-    printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "log path" "folder archive" "$LOG_DESTINATION/${NOW}_folder.log"
-    printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "log path" "combined backup" "$LOG_DESTINATION/${NOW}_combined.log"
+    printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "log path" "nBackup" "$LOG_DESTINATION/nBackup.log"
+    printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "log path" "rsync" "$LOG_DESTINATION/rsync.log"
+    printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "log path" "folder archive" "$LOG_DESTINATION/folder.log"
+    printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "log path" "combined backup" "$LOG_DESTINATION/combined.log"
 }
 
-doIt | tee "$LOG_DESTINATION/${NOW}_nBackup.log"
+doIt | tee "$LOG_DESTINATION/nBackup.log"
 
-rsync_stats=$(tail -50 "$LOG_DESTINATION/${NOW}_rsync.log" | egrep -A 50 "^Number of files: ")
+rsync_stats=$(tail -50 "$LOG_DESTINATION/rsync.log" | egrep -A 50 "^Number of files: ")
 
 # get the number of files that were created or deleted
 num_files_created=$([[ $rsync_stats =~ $(echo "Number of created files: ([0-9]+)") ]] && echo "${BASH_REMATCH[1]}")
@@ -152,5 +155,5 @@ num_files_deleted=$([[ $rsync_stats =~ $(echo "Number of deleted files: ([0-9]+)
 num_files_transferred=$([[ $rsync_stats =~ $(echo "Number of regular files transferred: ([0-9]+)") ]] && echo "${BASH_REMATCH[1]}")
 errors=$(echo "$rsync_stats" | grep -q "rsync error: " && echo " - WITH ERRORS" || echo "")
 
-cat "$LOG_DESTINATION/${NOW}_nBackup.log" | mail -s "$(hostname) backup report - $ARCHIVE_DATE ($num_files_created / $num_files_deleted / $num_files_transferred)$errors" nacho
+cat "$LOG_DESTINATION/nBackup.log" | mail -s "$(hostname) backup report - $ARCHIVE_DATE ($num_files_created / $num_files_deleted / $num_files_transferred)$errors" nacho
 
