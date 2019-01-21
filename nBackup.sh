@@ -88,9 +88,9 @@ function doIt
     fi
     
     # get the number of files that were created or deleted
-    num_files_created=$([[ $rsync_stats =~ $(echo "Number of created files: ([0-9]+)") ]] && echo "${BASH_REMATCH[1]}")
-    num_files_deleted=$([[ $rsync_stats =~ $(echo "Number of deleted files: ([0-9]+)") ]] && echo "${BASH_REMATCH[1]}")
-    num_files_transferred=$([[ $rsync_stats =~ $(echo "Number of regular files transferred: ([0-9]+)") ]] && echo "${BASH_REMATCH[1]}")
+    num_files_created=$([[ $rsync_stats =~ $(echo "Number of created files: ([0-9,]+)") ]] && echo "${BASH_REMATCH[1]}")
+    num_files_deleted=$([[ $rsync_stats =~ $(echo "Number of deleted files: ([0-9,]+)") ]] && echo "${BASH_REMATCH[1]}")
+    num_files_transferred=$([[ $rsync_stats =~ $(echo "Number of regular files transferred: ([0-9]+,)") ]] && echo "${BASH_REMATCH[1]}")
     
     # we only need to make a snapshot if files were deleted or created
     if [[ "$num_files_created" -ne 0 || "$num_files_deleted" -ne 0 || "$num_files_transferred" -ne 0 ]] ; then
