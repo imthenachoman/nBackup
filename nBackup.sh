@@ -61,7 +61,7 @@ done
 
 NOW=$(/bin/date +"$ARCHIVE_DATE_FORMAT")
 ARCHIVE_DATE=$(/bin/date +"$ARCHIVE_DATE_FORMAT")
-LOG_OUTPUT_FORMAT="%s | %-15s | %-8s | %s\n"
+LOG_OUTPUT_FORMAT="%s | %-15s | %-15s | %s\n"
 
 function doIt
 {
@@ -134,6 +134,12 @@ function doIt
     fi
     
     printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "nBackup" "finished" "done"
+    
+    # print log location
+    printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "log path" "nBackup" "$LOG_DESTINATION/${NOW}_nBackup.log"
+    printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "log path" "rsync" "$LOG_DESTINATION/${NOW}_rsync.log"
+    printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "log path" "folder archive" "$LOG_DESTINATION/${NOW}_folder.log"
+    printf "$LOG_OUTPUT_FORMAT" "$(/bin/date +"$LOG_TIME_FORMAT")" "log path" "combined backup" "$LOG_DESTINATION/${NOW}_combined.log"
 }
 
 doIt | tee "$LOG_DESTINATION/${NOW}_nBackup.log"
