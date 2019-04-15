@@ -2,30 +2,29 @@
 
 # first check if the config file is there
 if [[ ! -e ~/.nBackup.conf ]] ; then
-    echo "ERROR: ~/.nBackup.conf does not exist!" 2>/dev/null
+    echo "ERROR: \"~/.nBackup.conf\" does not exist!" 2>/dev/null
     echo "       Check the app installation directory for an example .nBackup.conf file." 2>/dev/null
-    echo "       Copy it to ~/.nBackup.conf and update with appropriate values." 2>/dev/null
     exit 1
 fi
 
 # check if we can read the file
 if [[ ! -r ~/.nBackup.conf ]] ; then
-    echo "ERROR: Unable to read ~/.nBackup.conf!" 2>/dev/null
+    echo "ERROR: Unable to read \"~/.nBackup.conf\"!" 2>/dev/null
     exit 1
 fi
 
 # make sure it has the right permissions
 if stat -c "%a" ~/.nBackup.conf | grep --quiet -v 600 ;
 then
-    echo "ERROR: ~/.nBackup.conf has invalid permissions." 2>/dev/null
-    echo "       ~/.nBackup.conf should be 600" 2>/dev/null
+    echo "ERROR: \"~/.nBackup.conf\" has invalid file permissions!" 2>/dev/null
+    echo "       File permissions for \"~/.nBackup.conf\" should be 600." 2>/dev/null
     exit 1
 fi
 
 # make sure the file is owened by the current user
 if [[ "$(stat -c "%U:%G" ~/.nBackup.conf)" != "$(whoami):$(whoami)" ]] ; then
-    echo "ERROR: ~/.nBackup.conf does not have the correct file ownership." 2>/dev/null
-    echo "       ~/.nBackup.conf should be $(whoami):$(whoami)" 2>/dev/null
+    echo "ERROR: \"~/.nBackup.conf\" does not have the correct file ownership!" 2>/dev/null
+    echo "       \"~/.nBackup.conf\" should be \"$(whoami):$(whoami)\"." 2>/dev/null
     exit 1
 fi
 
@@ -38,23 +37,24 @@ fi
 source ~/.nBackup.conf
 
 # make relevant folders if they don't exist
-# and make sure they are writeable
+# and make sure they are writable
 for folder in BACKUP_DESTINATION_CURRENT BACKUP_DESTINATION_COMBINED BACKUP_DESTINATION_FOLDERS LOG_DESTINATION; do
     if ! mkdir -p "${!folder}" &>/dev/null ; then
-        echo "ERROR: Unable to make $folder \"${!folder}\"" 2>/dev/null
+        echo "ERROR: Unable to make $folder \"${!folder}\"!" 2>/dev/null
         exit 1
     fi
     
     if [[ ! -w "${!folder}" ]] ; then
-        echo "ERROR: Unable to write to $folder \"${!folder}\"" 2>/dev/null
+        echo "ERROR: Unable to write to $folder \"${!folder}\"!" 2>/dev/null
         exit 1
     fi
 done
 
-# make sure the folders to be backed up are readable
-for folder in "${BACKUP_PATHS[@]}" ; do
-    if [[ ! -r "$folder" ]] ; then
-        echo "ERROR: Unable to read source folder \"$folder\"" 2>/dev/null
+# make sure the include and exclude files are readable
+for file in BACKUP_INCLUDES_FILE BACKUP_EXCLUDES_FILE; do
+    if [[ ! -r "${!file}" ]] ; then
+        echo "ERROR: Unable to read $file \"${!file}\"!" 2>/dev/null
+        echo "       Check the app installation directory for an example file." 2>/dev/null
         exit 1
     fi
 done
@@ -62,7 +62,10 @@ done
 NOW=$(date +"$ARCHIVE_DATE_FORMAT")
 ARCHIVE_DATE=$(date +"$ARCHIVE_DATE_FORMAT")
 LOG_OUTPUT_FORMAT="%s | %-15s | %-15s | %s\n"
+LOG_DESTINATION="$LOG_DESTINATION/$NOW"
 
+# pretty date/time difference of two dates/times represented as seconds
+# dateDiff startDateTimeInSeconds endDateTimeInSeconds
 function dateDiff
 {
     local differenceInSeconds=$(expr $2 - $1)
@@ -82,12 +85,13 @@ function doIt
 {
     starting_main=$(date +"%s")
     starting_section=$starting_main
+    
     printf "$LOG_OUTPUT_FORMAT" "$(date +"$LOG_TIME_FORMAT")" "nBackup" "starting" "starting"
     
     printf "$LOG_OUTPUT_FORMAT" "$(date +"$LOG_TIME_FORMAT")" "rsync" "starting" "this could take a while depending on the number of files"
     
-    # rsync the files and 
-    rsync -a --delete --stats --out-format="%t | %5o | %15l | %f" "${BACKUP_PATHS[@]}" "${BACKUP_DESTINATION_CURRENT}" &> "$LOG_DESTINATION/rsync.log"
+    # rsync the files
+    rsync --archive --delete --recursive -xx --relative --stats --out-format="%t | %5o | %15l | %f" --files-from="$BACKUP_INCLUDES_FILE" --exclude-from="$BACKUP_EXCLUDES_FILE" / "$BACKUP_DESTINATION_CURRENT" &> "$LOG_DESTINATION/rsync.log"
     
     printf "$LOG_OUTPUT_FORMAT" "$(date +"$LOG_TIME_FORMAT")" "rsync" "finished" "$(dateDiff $starting_section $(date +"%s"))"
     
@@ -162,9 +166,9 @@ function doIt
 }
 
 # make date folder for logs
-LOG_DESTINATION="$LOG_DESTINATION/$NOW"
 mkdir -p "$LOG_DESTINATION"
 
+# start it and log everything
 doIt | tee "$LOG_DESTINATION/nBackup.log"
 
 rsync_stats=$(tail -50 "$LOG_DESTINATION/rsync.log" | egrep -A 50 "^Number of files: ")
