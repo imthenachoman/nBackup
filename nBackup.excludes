@@ -1,3 +1,13 @@
-/mnt
+/proc
 /tmp
+/mnt
+/dev
+/sys
+/run
+/lost+found
+/media
+/var/log
+/var/cache/apt/archives
+/home/*/.gvfs
 /home/*/.cache
+/home/*/.local/share/Trash
