@@ -1,6 +1,6 @@
 # nBackup
 
-nBackup is a simple bash script for making versioned backups of your data where versions are browsable as current backups, snapshot-in-time folders, and running file versions
+nBackup is a simple bash script for making versioned dependency-less backups of your data where versions are browsable as current backups, snapshot-in-time folders, and running file versions.
 
 ## How It Works
 
@@ -11,6 +11,16 @@ This script implements the ideas covered [here](http://www.mikerubel.org/compute
 1. **current** - the current version of the backup
 1. **snapshot-in-time folders** - if you want to view/restore all the data from a specific backup
 1. **running file versions** - if you want to quickly view previous versions of a specific file
+
+## Why and My Requirements
+
+Obviously there are [a lot](https://github.com/n1trux/awesome-sysadmin#backups) of backup solutions that already exist. None of them met my requirements or were far more complicated than I need. I am a fan of the [KISS principle](https://en.wikipedia.org/wiki/KISS_principle) and feel backups shouldn't be complex because then recovery is complicated and you don't want complex when shit's hit the fan and you need to recover critical data urgently.
+
+My requirements:
+
+-   **dependency-less backups and restores** -- I wanted backups that I could copy to a new system and restore without having to first install a slew of programs/dependencies.
+-   **speed over space** -- storage is cheap, processing time is not. I wanted to do straight file copies without compressing, tarring, or encrypting. My backups are then encrypted to the cloud using https://rclone.org/.
+-   **browsable** -- I wanted backups that I could browse in three different ways ([see How It Works](#how-it-works))
 
 ## Example End Result
 
