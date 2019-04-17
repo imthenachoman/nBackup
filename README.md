@@ -20,7 +20,7 @@ My requirements:
 
 -   **dependency-less backups and restores** -- I wanted backups that I could copy to a new system and restore without having to first install a slew of programs/dependencies.
 -   **speed over space** -- storage is cheap, processing time is not. I wanted to do straight file copies without compressing, tarring, or encrypting. My backups are then encrypted to the cloud using https://rclone.org/.
--   **browsable** -- I wanted backups that I could browse in three different ways ([see How It Works](#how-it-works)).
+-   **browsable** -- I wanted backups that I could browse in three different ways (see [How It Works](#how-it-works)).
 
 ## Example End Result
 
