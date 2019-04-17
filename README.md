@@ -2,8 +2,6 @@
 
 nBackup is a simple bash script for making versioned dependency-less backups of your data where versions are browsable as current backups, snapshot-in-time folders, and running file versions.
 
-[TOC]
-
 ## How It Works
 
 This script implements the ideas covered [here](http://www.mikerubel.org/computers/rsync_snapshots/) and [here](http://www.admin-magazine.com/Articles/Using-rsync-for-Backups/%28offset%29). I won't go into the details here -- read the articles if you're curious, but at a high level, the script works by making `rsync` backups of your data, then using hard-links to identify different versions. By using hard-links you save on space by only saving new copies of files if they have changed.
