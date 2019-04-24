@@ -1,5 +1,19 @@
 #!/bin/bash
 
+# nBackup
+# ----------------------------------------------------------------------------
+# nBackup is a simple bash script for making versioned, dependency-less
+# backups of your data where versions are browsable as current backups,
+# snapshot-in-time folders, and running file versions.
+#
+# url     : https://github.com/imthenachoman/nBackup
+# author  : Anchal Nigam
+# e-mail  : imthenachoman@gmail.com
+#
+# Copyright (c) 2019 Anchal Nigam (imthenachoman@gmail.com)
+# Licensed under the MIT license: http://opensource.org/licenses/MIT
+# ----------------------------------------------------------------------------
+
 ###############################################################################
 # FUNCTIONS
 ###############################################################################
