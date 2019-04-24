@@ -1,6 +1,6 @@
 # nBackup
 
-nBackup is a simple bash script for making versioned dependency-less backups of your data where versions are browsable as current backups, snapshot-in-time folders, and running file versions.
+nBackup is a simple bash script for making versioned, dependency-less backups of your data where versions are browsable as current backups, snapshot-in-time folders, and running file versions.
 
 ## How It Works
 
