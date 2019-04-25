@@ -23,6 +23,17 @@ Obviously there are [a lot](https://github.com/n1trux/awesome-sysadmin#backups) 
 
 This script implements the ideas covered [here](http://www.mikerubel.org/computers/rsync_snapshots/) and [here](http://www.admin-magazine.com/Articles/Using-rsync-for-Backups/%28offset%29). I won't go into the details here -- read the articles if you're curious, but at a high level, the script works by making `rsync` backups of your data, then using hard-links to identify different versions. By using hard-links you save on space by only saving new copies of files if they have changed.
 
+## How To Use It
+
+1.  clone the repo: `git clone https://github.com/imthenachoman/nBackup`
+1.  copy `nBackup.includes` somewhere and add the folders you **do** want backed up
+1.  copy `nBackup.excludes` somewhere and add the folders you **do not** want backed up
+1.  copy `nBackup.conf` to `~/.nBackup.conf` and edit per your requirements
+1.  make sure `BACKUP_INCLUDES_FILE` and `BACKUP_EXCLUDES_FILE` in `~/.nBackup.conf` point to correct paths for #2 and #3
+1.  secure the permissions for `~/.nBackup.conf`: 
+    1.  `chmod 600 ~/.nBackup.conf`
+    1.  `chown $(whoami):$(whoami) ~/.nBackup.conf`
+1.  execute `nBackup.sh`
 
 ## Example End Result
 
