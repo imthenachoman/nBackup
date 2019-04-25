@@ -16,7 +16,7 @@ Obviously there are [a lot](https://github.com/n1trux/awesome-sysadmin#backups) 
 -   **delete old backups** - old backups can be deleted based on an `and` or `or` combination of:
     1.   `count` - keep at least this many old backups
     1.   `minimum age` - keep old backups that are newer than this many seconds, minutes, hours, days, weeks, months, or years
--   **mail** - status/output sent to e-mail
+-   **e-mail status** - status/output sent to e-mail
 -   **speed over space** - storage is cheap, processing time is not; there is no compression, tarring, or encryption (For my use-case, after `nBackup` takes a backup, I use https://rclone.org to send encrypted copies to my public cloud storage solution.)
 
 ## How It Works
