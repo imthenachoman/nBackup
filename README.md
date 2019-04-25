@@ -29,55 +29,56 @@ This script implements the ideas covered [here](http://www.mikerubel.org/compute
 Assuming your source folder looks like so:
 
  - `source`
-   - `file 001`
-   - `file 002`
-   - `file 004` 
-   - `folder 100`
-     - `file 005`
-     - `file 006`
+   - `file 001` (inode # 10)
+   - `file 002` (inode # 20)
+   - `file 003` (inode # 30)
 
-(Note: `source/file 003` is missing because it was deleted after a backup was made.)
+And you do the following:
 
-Then, after a few backups to `/backup` this is what you'll end up with:
+1. take a backup
+1. delete `source/file 003`, add `source/file 004`, take a backup
+1. modify `source/file 002`, add some new files to `source/folder 100`, take a backup
 
-(Note, actual file/folders will include date/time stamp but I have removed the time for this example. You can customize the date/time format you want to use.)
+This is how your backup folder would look:
 
  - `backup`
    - `20190101` -- first backup
      - `source`
-       - `file 001`
-       - `file 002`
-       - `file 003`
-   - `20190201` -- second backup; deleted `source/file 003` and created `source/file 004`
+       - `file 001` (inode # 10)
+       - `file 002` (inode # 20)
+       - `file 003` (inode # 30)
+   - `20190201` -- second backup; deleted `source/file 003` and added `source/file 004`
      - `source`
-       - `file 001`
-       - `file 002`
-       - `file 004` 
-   - `20190301` -- third backup; created `source/folder 100` and modified `source/file 002`
+       - `file 001` (inode # 10)
+       - `file 002` (inode # 20)
+       - `file 004` (inode # 40)
+   - `20190301` -- third backup; modified`source/file 002` and added some new files to `source/folder 100`
      - `source`
-       - `file 001`
-       - `file 002`
+       - `file 001` (inode # 10)
+       - `file 002` (inode # **21**) -- points to a different file than the previous backups
        - `file 004` 
        - `folder 100`
-         - `file 005`
-         - `file 006`
+         - `file 005` (inode # 50)
+         - `file 006` (inode # 60)
    - `current`
      - `source`
-       - `file 001`
-       - `file 002`
-       - `file 004` 
+       - `file 001` (inode # 10)
+       - `file 002` (inode # **21**) -- points to the most recent version of the file
+       - `file 004` (inode # 40)
        - `folder 100`
-         - `file 005`
-         - `file 006`
+         - `file 005` (inode # 50)
+         - `file 006` (inode # 60)
    - `combined`
      - `source`
-       - `file 001.20190101`
-       - `file 002.20190101`
-       - `file 002.20190201` -- notice there are two versions of this file in the same folder so you can quickly find the one you want
-       - `file 003.20190101`
-       - `file 004.20190201` 
+       - `file 001.20190101` (inode # 10)
+       - `file 002.20190101` (inode # **20**)
+       - `file 002.20190201` (inode # **21**) -- notice there are two versions of this file in the same folder so you can quickly find the one you want
+       - `file 003.20190101` (inode # 30)
+       - `file 004.20190201` (inode # 40)
        - `folder 100`
-         - `file 005.20190301`
-         - `file 006.20190301`
+         - `file 005.20190301` (inode # 50)
+         - `file 006.20190301` (inode # 60)
 
-You can't see it in the example, but files that were not changed during each backup all point to the same file to save space. 
+Notice how the files share a common `inode`. This is because, since the file(s) didn't change, they point to the same file. When a file changes, the old versions point to the original and the new version points to a new file. This saves a lot of space.
+
+Note: The actual file/folders will include date/time stamp but I have removed the time for this example. You can customize the date/time format you want to use.
