@@ -1,26 +1,28 @@
 # nBackup
 
-nBackup is a simple bash script for making versioned, dependency-less backups of your data where versions are browsable as current backups, snapshot-in-time folders, and running file versions.
+A [simple](https://en.wikipedia.org/wiki/KISS_principle) Bash script for making local backups with different views.
+
+## Why
+
+Obviously there are [a lot](https://github.com/n1trux/awesome-sysadmin#backups) of backup solutions that already exist. None of them met my requirements or were far more complicated than I need. I am a fan of the [KISS principle](https://en.wikipedia.org/wiki/KISS_principle) and feel backups shouldn't be complex because then recovery is complicated and you don't want complex when shit's hit the fan and you need to recover critical data urgently.
+
+## Features
+
+-   **dependency-less** - backups can be copied to a new system and restored without having to install a slew of programs/dependencies
+-   **browsable in 3 ways** - backups can be viewed/browsed in three different ways right from the command-line:
+    1.   **current** - the current version of the backup
+    1.   **snapshot-in-time folders** - if you want to view/restore all the data from a specific backup
+    1.   **running file versions** - if you want to quickly view previous versions of a specific file
+-   **delete old backups** - old backups can be deleted based on an `and` or `or` combination of:
+    1.   `count` - keep at least this many old backups
+    1.   `minimum age` - keep old backups that are newer than this many seconds, minutes, hours, days, weeks, months, or years
+1.   **mail** - status/output sent to e-mail
+1.   **speed over space** - storage is cheap, processing time is not; there is no compression, tarring, or encryption (For my use-case, after `nBackup` takes a backup, I use https://rclone.org to send encrypted copies to my public cloud storage solution.)
 
 ## How It Works
 
 This script implements the ideas covered [here](http://www.mikerubel.org/computers/rsync_snapshots/) and [here](http://www.admin-magazine.com/Articles/Using-rsync-for-Backups/%28offset%29). I won't go into the details here -- read the articles if you're curious, but at a high level, the script works by making `rsync` backups of your data, then using hard-links to identify different versions. By using hard-links you save on space by only saving new copies of files if they have changed.
 
-`nBackup` will create three views of your data:
-
-1. **current** - the current version of the backup
-1. **snapshot-in-time folders** - if you want to view/restore all the data from a specific backup
-1. **running file versions** - if you want to quickly view previous versions of a specific file
-
-## Why and My Requirements
-
-Obviously there are [a lot](https://github.com/n1trux/awesome-sysadmin#backups) of backup solutions that already exist. None of them met my requirements or were far more complicated than I need. I am a fan of the [KISS principle](https://en.wikipedia.org/wiki/KISS_principle) and feel backups shouldn't be complex because then recovery is complicated and you don't want complex when shit's hit the fan and you need to recover critical data urgently.
-
-My requirements:
-
--   **dependency-less backups and restores** -- I wanted backups that I could copy to a new system and restore without having to first install a slew of programs/dependencies.
--   **speed over space** -- storage is cheap, processing time is not. I wanted to do straight file copies without compressing, tarring, or encrypting. My backups are then encrypted and sent to the cloud using https://rclone.org/.
--   **browsable** -- I wanted backups that I could browse in three different ways (see [How It Works](#how-it-works)) right from the command-line.
 
 ## Example End Result
 
